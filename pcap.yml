@@ -1,0 +1,29 @@
+---
+- hosts: all
+  become: true
+  become_user: root
+  tasks:
+
+    - name: Collect PCAP file from server
+      fetch:
+        src: /home/amadeoubuntu/pcap/apple.pcap
+        dest: /home/amadeoubuntu/CPE243_HoA8p1/collectedPCAP/
+        flat: yes
+
+- hosts: control_node
+  connection: local
+  gather_facts: false
+  tasks:
+
+    - name: Extract executable from PCAP file
+      command: "tcpflow -r /home/amadeoubuntu/CPE243_HoA8p1/collectedPCAP/apple.pcap -o /home/amadeoubuntu/CPE243_HoA8p1/extractedPCAP/"
+      args:
+        creates: /home/amadeoubuntu/CPE243_HoA8p1/collcetedPCAP/executable.exe
+
+    - name: Debug .exe file
+      command: "cat /home/amadeoubuntu/CPE243_HoA8p1/extractedPCAP/report.xml"
+      register: cat_output
+      changed_when: false
+
+    - debug:
+        var: cat_output.stdout_lines
